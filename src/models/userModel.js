@@ -4,14 +4,18 @@ const sequelize = require("../db");
 const User = sequelize.define(
 	"User",
 	{
-		// Model attributes are defined here
-		firstName: {
+		name: {
 			type: DataTypes.STRING,
 			allowNull: false,
 		},
-		lastName: {
+		email: {
 			type: DataTypes.STRING,
-			// allowNull defaults to true
+			allowNull: false,
+			unique: true
+		},
+		password: {
+			type: DataTypes.STRING,
+			allowNull: false,
 		},
 	},
 	{

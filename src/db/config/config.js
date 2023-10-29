@@ -1,4 +1,4 @@
-const config  = require("../../config");
+const config = require("../../config");
 
 module.exports = {
 	development: {
@@ -6,7 +6,7 @@ module.exports = {
 		password: config.DB.PASSWORD || null,
 		database: config.DB.NAME,
 		host: config.DB.HOST,
-    port: config.DB.PORT,
+		port: config.DB.PORT,
 		dialect: "mysql",
 	},
 	test: {

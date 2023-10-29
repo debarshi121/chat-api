@@ -13,7 +13,6 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 
-
 // Routes
 const authRouter = require("./routes/authRoutes");
 

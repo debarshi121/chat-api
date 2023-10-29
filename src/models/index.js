@@ -1,11 +1,7 @@
 const User = require("./userModel");
-const sequelize = require("../db");
-
-const sync = () => {
-    sequelize.sync();
-}
+const ChatRoom = require("./chatRoomModel");
 
 module.exports = {
-    sync,
-    User
+    User,
+    ChatRoom
 }

@@ -1,25 +1,21 @@
 const { User } = require("../models");
 const bcrypt = require("bcryptjs");
-const Joi = require("joi");
 const jwt = require("jsonwebtoken");
 const { JWT_SECRET } = require("../config");
 
 exports.signup = async (req, res) => {
 	try {
-		const signupSchema = Joi.object({
-			name: Joi.string().min(3).max(30).required(),
-			email: Joi.string().email().required(),
-			password: Joi.string().min(6).required(),
-			confirmPassword: Joi.ref("password"),
-		}).with("password", "confirmPassword");
+		let user = await User.findOne({
+			where: {
+				email: req.body.email,
+			},
+		});
 
-		const { error } = signupSchema.validate(req.body);
-
-		if (error) {
-			return res.status(400).json({ error: error.message });
+		if (user) {
+			return res.status(400).send({ error: "Email already exists." });
 		}
 
-		const user = await User.create({
+		user = await User.create({
 			name: req.body.name,
 			email: req.body.email,
 			password: bcrypt.hashSync(req.body.password, 8),
@@ -32,17 +28,6 @@ exports.signup = async (req, res) => {
 
 exports.login = async (req, res) => {
 	try {
-		const loginSchema = Joi.object({
-			email: Joi.string().email().required(),
-			password: Joi.string().required(),
-		});
-
-		const { error } = loginSchema.validate(req.body);
-
-		if (error) {
-			return res.status(400).json({ error: error.message });
-		}
-
 		const user = await User.findOne({
 			where: {
 				email: req.body.email,

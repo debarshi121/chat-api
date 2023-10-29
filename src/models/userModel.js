@@ -1,4 +1,4 @@
-const { Sequelize, DataTypes } = require("sequelize");
+const { DataTypes } = require("sequelize");
 const sequelize = require("../db");
 
 const User = sequelize.define(
@@ -22,7 +22,5 @@ const User = sequelize.define(
 		// Other model options go here
 	}
 );
-
-// `sequelize.define` also returns the model
 
 module.exports = User;

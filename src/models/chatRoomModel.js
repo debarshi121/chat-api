@@ -8,7 +8,11 @@ const ChatRoom = sequelize.define(
 			type: DataTypes.STRING,
 			allowNull: false,
 			unique: true,
-		}
+		},
+		createdBy: {
+			type: DataTypes.INTEGER,
+			allowNull: false,
+		},
 	},
 	{
 		// Other model options go here

@@ -1,4 +1,5 @@
 const { JWT_SECRET } = require("../config");
+const jwt = require("jsonwebtoken");
 
 exports.protect = (req, res, next) => {
 	let token;

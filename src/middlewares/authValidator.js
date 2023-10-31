@@ -1,5 +1,20 @@
 const Joi = require("joi");
 
+const loginValidator = (req, res, next) => {
+	const loginSchema = Joi.object({
+		email: Joi.string().email().required(),
+		password: Joi.string().required(),
+	});
+
+	const { error } = loginSchema.validate(req.body);
+
+	if (error) {
+		return res.status(400).json({ error: error.message });
+	}
+
+	return next();
+};
+
 const signupValidator = (req, res, next) => {
 	const signupSchema = Joi.object({
 		name: Joi.string().min(3).max(30).required(),
@@ -14,7 +29,10 @@ const signupValidator = (req, res, next) => {
 		return res.status(400).json({ error: error.message });
 	}
 
-    return next();
+	return next();
 };
 
-module.exports = signupValidator;
+module.exports = {
+	loginValidator,
+	signupValidator,
+};

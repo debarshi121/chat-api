@@ -15,10 +15,12 @@ app.use(express.json());
 
 // Routes
 const authRouter = require("./routes/authRoutes");
-const chatRouter = require("./routes/chatRoutes");
+const chatRoomRouter = require("./routes/chatRoomRoutes");
+const messageRouter = require("./routes/messageRoutes");
 
 app.use(`/api/v1/auth`, authRouter);
-app.use(`/api/v1/chat`, chatRouter);
+app.use(`/api/v1/chatroom`, chatRoomRouter);
+app.use(`/api/v1/message`, messageRouter);
 
 app.all("*", (req, res) => {
 	res.status(404).json({ message: "Page not found!" });

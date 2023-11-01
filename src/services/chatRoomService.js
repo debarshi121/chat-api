@@ -19,6 +19,15 @@ const getChatRoomByRoom = async (room) => {
 	}
 };
 
+const deleteChatRoomByRoom = async (room) => {
+	try {
+		await ChatRoom.destroy({ where: { room } });
+		return true;
+	} catch (error) {
+		throw error;
+	}
+};
+
 const create = async (room, userId) => {
 	try {
 		room = await ChatRoom.create({
@@ -47,6 +56,7 @@ const join = async (room, userId) => {
 module.exports = {
 	getChatRoomById,
 	getChatRoomByRoom,
+	deleteChatRoomByRoom,
 	create,
 	join,
 };

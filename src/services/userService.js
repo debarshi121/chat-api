@@ -1,8 +1,13 @@
 const { User } = require("../models");
 const bcrypt = require("bcryptjs");
 
-const getUserById = (id) => {
-	return User.findByPk(id);
+const getUserById = async (id) => {
+	try {
+		const user = await User.findByPk(id);
+		return user;
+	} catch (error) {
+		throw error;
+	}
 };
 
 const getUserByEmail = async (email) => {

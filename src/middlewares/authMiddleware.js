@@ -1,7 +1,7 @@
 const { JWT_SECRET } = require("../config");
 const jwt = require("jsonwebtoken");
 
-exports.protect = (req, res, next) => {
+const protect = (req, res, next) => {
 	let token;
 
 	if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
@@ -17,7 +17,9 @@ exports.protect = (req, res, next) => {
 				message: "Unauthorized!",
 			});
 		}
-		req.userId = decoded.id;
+		req.user = decoded;
 		next();
 	});
 };
+
+module.exports = { protect };

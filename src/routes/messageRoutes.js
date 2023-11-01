@@ -6,5 +6,6 @@ const router = express.Router();
 
 // isRoomUser
 router.post("/send", protect, messageController.sendMessage);
+router.get("/history", protect, messageController.getHistory);
 
 module.exports = router;

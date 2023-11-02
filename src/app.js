@@ -2,9 +2,13 @@ const config = require("./config");
 const express = require("express");
 const cors = require("cors");
 const sequelize = require("./db");
+const { createServer } = require("http");
+const { Server } = require("socket.io");
+const { initializeSocketIO } = require("./socket");
 
 const PORT = config.SERVER.PORT;
 const app = express();
+const httpServer = createServer(app);
 
 const whitelist = ["*"];
 
@@ -16,11 +20,18 @@ const corsOptions = {
 			callback(new Error("Not allowed by CORS!"));
 		}
 	},
+	credentials: true,
 };
 
-app.use(cors(corsOptions));
+const io = new Server(httpServer, {
+	pingTimeout: 60000,
+	cors: corsOptions,
+});
+
+app.set("io", io);
 
 app.use(cors(corsOptions));
+
 app.use(express.json());
 
 // Routes
@@ -35,6 +46,8 @@ app.use(`/api/v1/message`, messageRouter);
 app.all("*", (req, res) => {
 	res.status(404).json({ message: "Page not found!" });
 });
+
+initializeSocketIO(io);
 
 app.listen(PORT, async () => {
 	try {

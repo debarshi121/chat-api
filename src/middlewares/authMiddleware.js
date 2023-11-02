@@ -1,5 +1,6 @@
 const { JWT_SECRET } = require("../config");
 const jwt = require("jsonwebtoken");
+const { User, ChatRoom } = require("../models");
 
 const protect = (req, res, next) => {
 	let token;
@@ -18,8 +19,36 @@ const protect = (req, res, next) => {
 			});
 		}
 		req.user = decoded;
-		next();
+		return next();
 	});
 };
 
-module.exports = { protect };
+const isRoomUser = async (req, res, next) => {
+	try {
+		let room;
+
+		if (req.body && req.body.room) {
+			room = req.body.room;
+		} else if (req.params && req.params.room) {
+			room = req.params.room;
+		}
+
+		const user = await User.findByPk(req.user.id, {
+			include: ChatRoom,
+		});
+
+		if (user) {
+			const chatRooms = user.ChatRooms;
+			const isAssociatedWithRoom = chatRooms.some((chatRoom) => chatRoom.room === room);
+
+			if (isAssociatedWithRoom) {
+				return next();
+			}
+		}
+		return res.status(403).json({ error: "You are not authorized to perform this!" });
+	} catch (error) {
+		throw error;
+	}
+};
+
+module.exports = { protect, isRoomUser };

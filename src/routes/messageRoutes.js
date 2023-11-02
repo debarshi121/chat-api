@@ -1,11 +1,10 @@
 const express = require("express");
 const messageController = require("../controllers/messageController");
-const { protect } = require("../middlewares/authMiddleware");
+const { protect, isRoomUser } = require("../middlewares/authMiddleware");
 
 const router = express.Router();
 
-// isRoomUser
-router.post("/send", protect, messageController.sendMessage);
-router.get("/history", protect, messageController.getHistory);
+router.post("/send", protect, isRoomUser, messageController.sendMessage);
+router.get("/history/:room", protect, isRoomUser, messageController.getHistory);
 
 module.exports = router;

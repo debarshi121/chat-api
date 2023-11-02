@@ -6,9 +6,19 @@ const sequelize = require("./db");
 const PORT = config.SERVER.PORT;
 const app = express();
 
+const whitelist = ["*"];
+
 const corsOptions = {
-	origin: "*",
+	origin: (origin, callback) => {
+		if (whitelist.indexOf(origin) !== -1 || !origin) {
+			callback(null, true);
+		} else {
+			callback(new Error("Not allowed by CORS!"));
+		}
+	},
 };
+
+app.use(cors(corsOptions));
 
 app.use(cors(corsOptions));
 app.use(express.json());

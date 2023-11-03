@@ -1,52 +1,48 @@
-const { Server, Socket } = require("socket.io");
+const { userService } = require("../services");
+const { JWT_SECRET } = require("../config");
+const jwt = require("jsonwebtoken");
 
-const initializeSocketIO = (io) => {
-	return io.on("connection", async (socket) => {
-        console.log('socket is ready for connection');
-		try {
-			// const token = socket.handshake.auth?.token;
-
-            // console.log(socket);
-
-            // return socket;
-
-			// if (!token) {
-			// 	// Token is required for the socket to work
-			// 	throw new Error(401, "Un-authorized handshake. Token is missing");
-			// }
-
-			// const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET); // decode the token
-
-			// const user = await User.findById(decodedToken?._id).select("-password -refreshToken -emailVerificationToken -emailVerificationExpiry");
-
-			// // retrieve the user
-			// if (!user) {
-			// 	throw new ApiError(401, "Un-authorized handshake. Token is invalid");
-			// }
-			// socket.user = user; // mount te user object to the socket
-
-			// // We are creating a room with user id so that if user is joined but does not have any active chat going on.
-			// // still we want to emit some socket events to the user.
-			// // so that the client can catch the event and show the notifications.
-			// socket.join(user._id.toString());
-			// socket.emit(ChatEventEnum.CONNECTED_EVENT); // emit the connected event so that client is aware
-			// console.log("User connected 🗼. userId: ", user._id.toString());
-
-			// // Common events that needs to be mounted on the initialization
-			// mountJoinChatEvent(socket);
-			// mountParticipantTypingEvent(socket);
-			// mountParticipantStoppedTypingEvent(socket);
-
-			// socket.on(ChatEventEnum.DISCONNECT_EVENT, () => {
-			// 	console.log("user has disconnected 🚫. userId: " + socket.user?._id);
-			// 	if (socket.user?._id) {
-			// 		socket.leave(socket.user._id);
-			// 	}
-			// });
-		} catch (error) {
-			// socket.emit(ChatEventEnum.SOCKET_ERROR_EVENT, error?.message || "Something went wrong while connecting to the socket.");
-		}
+const mountJoinRoomEvent = (socket) => {
+	socket.on("joinedRoom", (room) => {
+		console.log(`User joined the room: `, room);
+		socket.join(room);
 	});
 };
 
-module.exports = { initializeSocketIO };
+const initializeSocketIO = (io) => {
+	return io.on("connection", async (socket) => {
+		try {
+			const token = socket.handshake.headers.token;
+
+			if (!token) {
+				throw new Error(401, "Un-authorized handshake. Token is missing");
+			}
+
+			const decodedToken = jwt.verify(token, JWT_SECRET);
+
+			const user = await userService.getUserById(decodedToken?.id);
+
+			if (!user) {
+				throw new Error(401, "Un-authorized handshake. Token is invalid");
+			}
+			socket.user = user;
+			socket.emit("connected", "You are connected!");
+			console.log("User connected -> userId:", user.id);
+
+			mountJoinRoomEvent(socket);
+
+			socket.on("disconnect", (reason) => {
+				console.log("User disconnected -> userId:", socket.user?.id);
+				if (socket.user?.id) {
+					socket.leave(socket.user.id);
+				}
+			});
+		} catch (error) {}
+	});
+};
+
+const emitSocketEvent = (req, room, event, payload) => {
+	req.app.get("io").in(room).emit(event, payload);
+};
+
+module.exports = { initializeSocketIO, emitSocketEvent };

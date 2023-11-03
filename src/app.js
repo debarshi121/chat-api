@@ -49,7 +49,7 @@ app.all("*", (req, res) => {
 
 initializeSocketIO(io);
 
-app.listen(PORT, async () => {
+httpServer.listen(PORT, async () => {
 	try {
 		console.log(`Server running on port: ${PORT}`);
 		await sequelize.authenticate();

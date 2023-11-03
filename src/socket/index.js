@@ -37,7 +37,9 @@ const initializeSocketIO = (io) => {
 					socket.leave(socket.user.id);
 				}
 			});
-		} catch (error) {}
+		} catch (error) {
+			console.log(error.message)
+		}
 	});
 };
 

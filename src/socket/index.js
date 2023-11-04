@@ -6,28 +6,35 @@ const mountJoinRoomEvent = (socket) => {
 	socket.on("joinedRoom", (room) => {
 		console.log(`User joined the room: `, room);
 		socket.join(room);
+		socket.to(room).emit('UserJoinedRoom', socket.user);
 	});
 };
 
+const emitSocketEvent = (req, room, event, payload) => {
+	req.app.get("io").in(room).emit(event, payload);
+};
+
+const decryptAndStoreUserData = async (socket, io) => {
+	try {
+		const token = socket.handshake.headers.token;
+		const decodedToken = jwt.verify(token, JWT_SECRET);
+		const user = await userService.getUserById(decodedToken?.id);
+		if (!user) {
+			throw new Error(401, "Un-authorized handshake. Token is invalid");
+		}
+		socket.user = user;
+	} catch (error) {
+		throw error;
+	}
+};
+
 const initializeSocketIO = (io) => {
-	return io.on("connection", async (socket) => {
-		try {
-			const token = socket.handshake.headers.token;
+	try {
+		io.on("connection", async (socket) => {
+			await decryptAndStoreUserData(socket, io);
 
-			if (!token) {
-				throw new Error(401, "Un-authorized handshake. Token is missing");
-			}
-
-			const decodedToken = jwt.verify(token, JWT_SECRET);
-
-			const user = await userService.getUserById(decodedToken?.id);
-
-			if (!user) {
-				throw new Error(401, "Un-authorized handshake. Token is invalid");
-			}
-			socket.user = user;
 			socket.emit("connected", "You are connected!");
-			console.log("User connected -> userId:", user.id);
+			console.log("User connected -> userId:", socket.user?.id);
 
 			mountJoinRoomEvent(socket);
 
@@ -37,14 +44,10 @@ const initializeSocketIO = (io) => {
 					socket.leave(socket.user.id);
 				}
 			});
-		} catch (error) {
-			console.log(error.message)
-		}
-	});
-};
-
-const emitSocketEvent = (req, room, event, payload) => {
-	req.app.get("io").in(room).emit(event, payload);
+		});
+	} catch (error) {
+		console.log(error.message);
+	}
 };
 
 module.exports = { initializeSocketIO, emitSocketEvent };

@@ -23,7 +23,7 @@ const authenticate = async ({ email, password }) => {
 		const token = jwt.sign(userJson, JWT_SECRET, {
 			algorithm: "HS256",
 			allowInsecureKeySizes: true,
-			expiresIn: 86400, // 24 hours
+			expiresIn: 604800, // 1 week
 		});
 
 		return token;

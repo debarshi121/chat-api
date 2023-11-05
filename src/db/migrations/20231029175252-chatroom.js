@@ -13,7 +13,7 @@ module.exports = {
 				type: Sequelize.DataTypes.STRING,
 				allowNull: false,
 			},
-			createdBy: {
+			UserId: {
 				type: Sequelize.DataTypes.INTEGER,
 				references: {
 					model: {

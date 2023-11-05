@@ -8,10 +8,6 @@ const Message = sequelize.define(
 			type: DataTypes.STRING,
 			allowNull: false,
 		},
-		sentBy: {
-			type: DataTypes.INTEGER,
-			allowNull: false,
-		},
         message: {
 			type: DataTypes.TEXT,
 			allowNull: false,

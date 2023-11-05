@@ -5,7 +5,7 @@ const create = async (room, userId, message) => {
 		const newMessage = await Message.create({
 			room,
 			message,
-			sentBy: userId,
+			UserId: userId,
 		});
 
 		return newMessage;

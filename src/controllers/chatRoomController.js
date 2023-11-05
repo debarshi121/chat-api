@@ -1,9 +1,14 @@
-const { v4: uuidv4 } = require("uuid");
 const { chatRoomService } = require("../services");
+const { emitSocketEvent } = require("../socket");
+const { ChatRoom, User } = require("../models");
 
 const createRoom = async (req, res) => {
 	try {
-		const chatRoom = await chatRoomService.create(uuidv4(), req.user.id);
+		const isRoomExists = await chatRoomService.getChatRoomByRoom(req.body.room);
+		if (isRoomExists) {
+			return res.status(400).json({ error: "Room name already exists!" });
+		}
+		const chatRoom = await chatRoomService.create(req.body.room, req.user.id);
 		return res.status(201).json(chatRoom);
 	} catch (error) {
 		return res.status(500).json({ error: error.message });
@@ -14,7 +19,25 @@ const joinRoom = async (req, res) => {
 	try {
 		const { room } = req.body;
 
+		const isRoomExists = await chatRoomService.getChatRoomByRoom(req.body.room);
+
+		if (!isRoomExists) {
+			return res.status(404).json({ error: "Room doesn't exists!" });
+		}
+
 		const joinedRoom = await chatRoomService.join(room, req.user.id);
+
+		const chatRoom = await ChatRoom.findOne({ where: { room }, include: User });
+
+		chatRoom.Users.forEach((user) => {
+			if (user.id !== req.user.id) {
+				const userObj = {
+					id: req.user.id,
+					name: req.user.name,
+				};
+				emitSocketEvent(req, user.id.toString(), "newUserJoined", userObj);
+			}
+		});
 
 		return res.status(201).json(joinedRoom);
 	} catch (error) {

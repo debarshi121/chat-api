@@ -1,10 +1,24 @@
 const { messageService } = require("../services");
+const { emitSocketEvent } = require("../socket");
+const { User, ChatRoom, Message } = require("../models");
 
 const sendMessage = async (req, res) => {
 	try {
 		const { room, message } = req.body;
 		const newMessage = await messageService.create(room, req.user.id, message);
-		return res.status(201).json(newMessage);
+
+		const messageWithUser = await Message.findOne({ where: { id: newMessage.id }, include: User });
+
+		const chatRoom = await ChatRoom.findOne({ where: { room }, include: User });
+
+
+		chatRoom.Users.forEach((user) => {
+			if (user.id !== req.user.id) {
+				emitSocketEvent(req, user.id.toString(), "messageReceived", messageWithUser);
+			}
+		});
+
+		return res.status(201).json(messageWithUser);
 	} catch (error) {
 		return res.status(500).json({ error: error.message });
 	}

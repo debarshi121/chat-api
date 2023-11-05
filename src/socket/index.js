@@ -2,13 +2,6 @@ const { userService } = require("../services");
 const { JWT_SECRET } = require("../config");
 const jwt = require("jsonwebtoken");
 
-const mountJoinRoomEvent = (socket) => {
-	socket.on("joinedRoom", (room) => {
-		console.log(`User joined the room: `, room);
-		socket.join(room);
-	});
-};
-
 const initializeSocketIO = (io) => {
 	return io.on("connection", async (socket) => {
 		try {
@@ -26,19 +19,15 @@ const initializeSocketIO = (io) => {
 				throw new Error(401, "Un-authorized handshake. Token is invalid");
 			}
 			socket.user = user;
-			socket.emit("connected", "You are connected!");
 			console.log("User connected -> userId:", user.id);
+			socket.join(user.id.toString());
 
-			mountJoinRoomEvent(socket);
-
-			socket.on("disconnect", (reason) => {
+			socket.on("disconnect", () => {
 				console.log("User disconnected -> userId:", socket.user?.id);
-				if (socket.user?.id) {
-					socket.leave(socket.user.id);
-				}
+				socket.leave(socket.user?.id);
 			});
 		} catch (error) {
-			console.log(error.message)
+			console.log(error.message);
 		}
 	});
 };

@@ -32,7 +32,7 @@ const create = async (room, userId) => {
 	try {
 		room = await ChatRoom.create({
 			room,
-			createdBy: userId,
+			UserId: userId,
 		});
 
 		return room;

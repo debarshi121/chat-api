@@ -4,6 +4,9 @@ const Message = require("./messageModel");
 
 User.belongsToMany(ChatRoom, { through: 'RoomUser' });
 ChatRoom.belongsToMany(User, { through: 'RoomUser' });
+ChatRoom.belongsTo(User);
+User.hasMany(Message);
+Message.belongsTo(User);
 
 module.exports = {
     User,

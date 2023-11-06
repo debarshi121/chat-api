@@ -7,14 +7,19 @@ const sendMessage = async (req, res) => {
 		const { room, message } = req.body;
 		const newMessage = await messageService.create(room, req.user.id, message);
 
-		const messageWithUser = await Message.findOne({ where: { id: newMessage.id }, include: User });
+		const messageWithUser = await Message.findOne({
+			where: { id: newMessage.id },
+			include: {
+				model: User,
+				attributes: { exclude: ["password"] },
+			},
+		});
 
 		const chatRoom = await ChatRoom.findOne({ where: { room }, include: User });
 
-
 		chatRoom.Users.forEach((user) => {
 			if (user.id !== req.user.id) {
-				emitSocketEvent(req, user.id.toString(), "messageReceived", messageWithUser);
+				emitSocketEvent(req, user.id.toString(), "newRoomMessage", messageWithUser);
 			}
 		});
 

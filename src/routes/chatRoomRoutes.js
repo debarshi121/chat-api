@@ -1,7 +1,7 @@
 const express = require("express");
 const { createRoom, joinRoom, deleteRoom } = require("../controllers/chatRoomController");
 const { protect } = require("../middlewares/authMiddleware");
-const { createJoinRoomValidator } = require("../validators/chatRoomValidator");
+const { createJoinRoomValidator } = require("../middlewares/validators/chatRoomValidator");
 
 const router = express.Router();
 

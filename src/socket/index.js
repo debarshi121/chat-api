@@ -1,4 +1,3 @@
-const { userService } = require("../services");
 const { JWT_SECRET } = require("../config");
 const jwt = require("jsonwebtoken");
 
@@ -8,15 +7,13 @@ const initializeSocketIO = (io) => {
 			const token = socket.handshake.headers.token;
 
 			if (!token) {
-				throw new Error(401, "Un-authorized handshake. Token is missing");
+				throw new Error("Un-authorized handshake. Token is missing");
 			}
 
-			const decodedToken = jwt.verify(token, JWT_SECRET);
-
-			const user = await userService.getUserById(decodedToken?.id);
+			const user = jwt.verify(token, JWT_SECRET);
 
 			if (!user) {
-				throw new Error(401, "Un-authorized handshake. Token is invalid");
+				throw new Error("Un-authorized handshake. Token is invalid");
 			}
 			socket.user = user;
 			console.log("User connected -> userId:", user.id);

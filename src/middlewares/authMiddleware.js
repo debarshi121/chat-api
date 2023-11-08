@@ -1,6 +1,7 @@
 const { JWT_SECRET } = require("../config");
 const jwt = require("jsonwebtoken");
 const { User, ChatRoom } = require("../models");
+const { userService } = require("../services");
 
 const protect = (req, res, next) => {
 	let token;
@@ -12,14 +13,24 @@ const protect = (req, res, next) => {
 		return res.status(401).json({ error: "You are not logged in!" });
 	}
 
-	jwt.verify(token, JWT_SECRET, (err, decoded) => {
+	jwt.verify(token, JWT_SECRET, async (err, decoded) => {
 		if (err) {
-			return res.status(401).send({
-				message: "Unauthorized!",
+			return res.status(401).json({
+				error: "Unauthorized!",
 			});
 		}
-		req.user = decoded;
-		return next();
+		try {
+			req.user = decoded;
+			const user = await userService.getUserById(decoded?.id);
+			if (!user) {
+				return res.status(404).json({
+					error: "User not found!",
+				});
+			}
+			return next();
+		} catch (error) {
+			return res.status(500).json({ error: error.message });
+		}
 	});
 };
 

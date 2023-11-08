@@ -51,9 +51,13 @@ const deleteRoom = async (req, res) => {
 
 		const chatRoom = await chatRoomService.getChatRoomByRoom(room);
 
-		if (chatRoom && chatRoom.createdBy === req.user.id) {
+		if(!chatRoom){
+			return res.status(404).json({ error: "Chatroom not found!" });
+		}
+
+		if (chatRoom && chatRoom.UserId === req.user.id) {
 			await chatRoomService.deleteChatRoomByRoom(room);
-			return res.status(200).json({});
+			return res.status(200).json({ message: "Room deleted!" });
 		}
 
 		return res.status(403).json({ error: "You are not authorized to perform this!" });
